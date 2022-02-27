@@ -31,8 +31,8 @@ app.post('/api/createConsent/:phone', (req, res) => {
               "id": `${phone}@onemoney`
           },
           "FIDataRange": {
-              "from": "2021-10-01T00:00:00Z",
-              "to": "2021-11-01T00:00:00Z"
+              "from": "2021-01-01T00:00:00Z",
+              "to": "2022-01-01T00:00:00Z"
           },
           "consentMode": "STORE",
           "consentTypes": [
@@ -120,8 +120,8 @@ app.post('/api/createDataSession/:consentID', (req, res) => {
     {
       "consentId": consentID,
       "DataRange": {
-        "from": "2021-10-01T00:00:00Z",
-        "to": "2021-11-01T00:00:00Z"
+        "from": "2021-01-01T00:00:00Z",
+        "to": "2022-01-01T00:00:00Z"
       },
       "format": "json"
     },
