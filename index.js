@@ -1,20 +1,41 @@
-var http = require('http');
-var url = require('url');
-var request = require('request');
+var express = require('express'),
+    request = require('request'),
+    bodyParser = require('body-parser'),
+    app = express();
 
-http.createServer(onRequest).listen(process.env.PORT || 3000);
+var myLimit = typeof(process.argv[2]) != 'undefined' ? process.argv[2] : '10000kb';
+console.log('Using limit: ', myLimit);
 
-function onRequest(req, res) {
+app.use(bodyParser.json({limit: myLimit}));
 
-    var queryData = url.parse(req.url, true).query;
-    if (queryData.url) {
-        request({
-            url: queryData.url
-        }).on('error', function(e) {
-            res.end(e);
-        }).pipe(res);
+app.all('*', function (req, res, next) {
+
+    // Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE");
+    res.header("Access-Control-Allow-Headers", req.header('access-control-request-headers'));
+
+    if (req.method === 'OPTIONS') {
+        // CORS Preflight
+        res.send();
+    } else {
+        var targetURL = req.header('Target-URL'); // Target-URL ie. https://example.com or http://example.com
+        if (!targetURL) {
+            res.send(500, { error: 'There is no Target-Endpoint header in the request' });
+            return;
+        }
+        request({ url: targetURL + req.url, method: req.method, json: req.body, headers: {'Authorization': req.header('Authorization')} },
+            function (error, response, body) {
+                if (error) {
+                    console.error('error: ' + response.statusCode)
+                }
+//                console.log(body);
+            }).pipe(res);
     }
-    else {
-        res.end("no url found");
-    }
-}
+});
+
+app.set('port', process.env.PORT || 3000);
+
+app.listen(app.get('port'), function () {
+    console.log('Proxy server listening on port ' + app.get('port'));
+});
