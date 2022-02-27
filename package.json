@@ -6,6 +6,8 @@
   "dependencies": {
     "axios": "^0.26.0",
     "body-parser": "^1.19.2",
+    "connect-slashes": "^1.4.0",
+    "cors": "^2.8.5",
     "express": "^4.17.3",
     "follow-redirects": "^1.14.9",
     "request": "^2.88.2"
