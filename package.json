@@ -8,13 +8,15 @@
     "body-parser": "^1.19.2",
     "connect-slashes": "^1.4.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.17.3",
     "follow-redirects": "^1.14.9",
     "request": "^2.88.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -25,5 +27,8 @@
   "bugs": {
     "url": "https://github.com/code-squads/althsisserver/issues"
   },
-  "homepage": "https://github.com/code-squads/althsisserver#readme"
+  "homepage": "https://github.com/code-squads/althsisserver#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  }
 }

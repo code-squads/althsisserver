@@ -3,6 +3,10 @@ const slashes = require('connect-slashes');
 const cors = require('cors');
 const { default: axios } = require('axios');
 
+if(process.env.NODE_ENV !== "production") {
+  require('dotenv').config();
+}
+
 const PORT = process.env.PORT || 5000;
 
 // Setting up the server
@@ -18,15 +22,21 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 app.post('/api/createConsent/:phone', (req, res) => {
   const phone = req.params.phone;
+  const clientURL = req.body.clientURL || "https://althsis.netlify.app";
   if(phone.length != 10){
     return res.json({err: "invalid phone number"});
   }
+  console.log("Setu request:", { phone, CLIENT_ID, CLIENT_SECRET, clientURL });
+
+  const CONSENT_DEADLINE = 2;
+  let expiryDate = new Date(Date.now() + ( 3600 * 1000 * 24 * CONSENT_DEADLINE));
+
   axios.post(
     'https://fiu-uat.setu.co/consents',
     {
       "Detail": {
           "consentStart": `${(new Date()).toISOString()}`,
-          "consentExpiry": "2022-04-23T05:44:53.822Z",
+          "consentExpiry": expiryDate.toISOString(),
           "Customer": {
               "id": `${phone}@onemoney`
           },
@@ -71,7 +81,7 @@ app.post('/api/createConsent/:phone', (req, res) => {
               "DEPOSIT"
           ]
       },
-      "redirectUrl": "https://althsis.netlify.app/dash?fromSetu=true"
+      "redirectUrl": `${clientURL}/dash?fromSetu=true`,
     },
     {
       headers: {
@@ -81,10 +91,12 @@ app.post('/api/createConsent/:phone', (req, res) => {
     }
   )
   .then(setuResponse => {
+    // console.log("Setu response:", setuResponse);
     res.json(setuResponse.data)
   })
   .catch(err => {
-    res.json({error: err})
+    // console.log("Setu error:", err);
+    res.status(500).json({error: "Some issue accessing SETU APIs !!"})
   });
 });
 
@@ -142,9 +154,12 @@ app.post('/api/createDataSession/:consentID', (req, res) => {
 
 app.get('/api/getData/:dataSessionID', (req, res) => {
   const dataSessionID = req.params.dataSessionID;
+  console.log("Get data: ", { dataSessionID, CLIENT_ID, CLIENT_SECRET });
   if(!dataSessionID){
     return res.json({err: "invalid consent ID"});
   }
+
+  
   axios.get(
     `https://fiu-uat.setu.co/sessions/${dataSessionID}`,
     {
@@ -154,12 +169,14 @@ app.get('/api/getData/:dataSessionID', (req, res) => {
       }
     }
   )
-  .then(setuResponse => {
-    res.json(setuResponse.data)
-  })
-  .catch(err => {
-    res.json({error: err})
-  });
+    .then(setuResponse => {
+      console.log("setu response", setuResponse.data);
+      res.json(setuResponse.data)
+    })
+    .catch(err => {
+      console.log("setu getData err", err);
+      res.status(500).json({error: "Some error fetching data"});
+    });
 });
 
 app.get('/responses/ping', (req, res)=>{
