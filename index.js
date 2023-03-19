@@ -13,8 +13,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(slashes(false));
 app.listen(PORT, () => console.log(`Althsis server is up and running on port ${PORT}`));
 
-const CLIENT_ID = "aca3456d-c1dc-4dd9-b951-297486bc447e";
-const CLIENT_SECRET = "0b07ed31-d028-4191-90d0-c4f35cab6d48";
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 app.post('/api/createConsent/:phone', (req, res) => {
   const phone = req.params.phone;
